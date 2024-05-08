@@ -1,7 +1,6 @@
-""" Адаптеры для хранилищ """
-import sqlite3
+""" Классы-адаптеры для хранилищ """
 from sqlite3.dbapi2 import Cursor
-from setup.init import connection
+from database.sqlite.init import connection
 
 
 class Database:
@@ -15,6 +14,7 @@ class Database:
 
     def create_employee(self):
         """ Устроить нового сотрудника в штат """
+
 
 class Cache:
     pass

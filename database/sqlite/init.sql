@@ -7,10 +7,9 @@ CREATE TABLE IF NOT EXISTS main.Employee (
     empstartdate date NOT NULL DEFAULT CURRENT_TIMESTAMP,
     dismissdate date DEFAULT NULL,
     empstatus boolean DEFAULT TRUE,
-    pass_id NOT NULL CHECK (REGEXP '[0-9]{3}-[0-9]{3}') UNIQUE,
+    pass_id NOT NULL CHECK (regex('\d{3}-\d{3}')) UNIQUE,  /* Функция regex из внешнего модуля sqlite-regex  https://github.com/asg017/sqlite-regex*/
     CONSTRAINT check_emp_date CHECK (empstartdate <= dismissdate),
-    CONSTRAINT check_payment CHECK (parperhour > 0),
-    CONSTRAINT t CHECK (REGEXP)
+    CONSTRAINT check_payment CHECK (parperhour > 0)
     );
 
 
