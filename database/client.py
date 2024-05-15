@@ -1,14 +1,14 @@
-import sqlite3
-from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Callable
 from dotenv import dotenv_values
+from fastapi import FastAPI
+from database.sqlite.init import connection, BASE_DIR
+from database.models import Sallary, Bookkeeping, Employee
+
+conf = dotenv_values(dotenv_path="../conf.env")
+fastapi = FastAPI()
 
 
-conf = dotenv_values(dotenv_path="../../conf.env")
-
-
-class API(HTTPServer, BaseHTTPRequestHandler):
-    _server = None
+class API:
     path_roots = {
         "add_employee": "emp/add-emp/",
         "dismiss_employee": "emp/dis-emp/",
@@ -19,37 +19,34 @@ class API(HTTPServer, BaseHTTPRequestHandler):
         "change_bookkeeping": "bookkeeping/change/",
     }
 
-    def run(self, server_class=HTTPServer, handler_class=BaseHTTPRequestHandler):
-        server_address = ('', 8000)
-        httpd = server_class(server_address, handler_class)
-        httpd.serve_forever()
+
+@fastapi.post("emp/add-emp/{emp_id}")
+def add_employee(emp_id):
+    ...
 
 
-    def select_item(self, api_url, name, model_name=None):
-        ...
-
-    def insert_item(self):
-        ...
-
-    def __getattribute__(self, item, *args, **kwargs) -> Callable:
-        return super().__getattribute__(item)(self.path_roots[item])
+@fastapi.post("emp/dis-emp/{emp_id}")
+def dismiss_employee(emp_id):
+    pass
 
 
-class DatabaseClient:
-    _connection = None
-
-    def __new__(cls, path=conf["DATABASE_URL"]):
-        ...  # sqlite3.connection
-
-    def insert(self, table_name):
-        pass
-
-    def delete(self):
-        pass
-
-    def update(self):
-        pass
+@fastapi.post()
+def issue_wages(self):
+    ...
 
 
-if __name__ == "__main__":
-    API().run()
+def change_sallary(self):
+    pass
+
+
+def request_sal_token(self):
+    pass
+
+
+def destroy_token(self):
+    pass
+
+
+def change_bookkeeping(self):
+    pass
+

@@ -3,11 +3,12 @@ import sqlite3
 from dotenv import dotenv_values
 
 
-ENV = dotenv_values(dotenv_path="../../conf.env")
-DATABASE_URL = ENV["DATABASE_URL"]
+BASE_DIR = f"{os.getcwd()[:os.getcwd().index('fastapi_test_work04.2024')]}/fastapi_test_work04.2024"
+env = dotenv_values(dotenv_path=os.path.join(BASE_DIR, "conf.env"))
+DATABASE_URL = env["DATABASE_URL"]
 connection = sqlite3.connect(os.path.abspath(DATABASE_URL))
 connection.enable_load_extension(True)
-connection.load_extension(f"../{ENV['ENV_NAME']}/Lib/site-packages/sqlite_regex/regex0")  # windows конфигурация https://github.com/asg017/sqlite-regex?tab=readme-ov-file#as-a-loadable-extension
+connection.load_extension(os.path.normpath(f"{BASE_DIR}/{env['ENV_NAME']}/Lib/site-packages/sqlite_regex/regex0"))  # https://github.com/asg017/sqlite-regex?tab=readme-ov-file#as-a-loadable-extension
 
 
 def set_up():
