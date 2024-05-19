@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS main.Employee (
     empstartdate date NOT NULL DEFAULT CURRENT_TIMESTAMP,
     dismissdate date DEFAULT NULL,
     empstatus boolean DEFAULT TRUE,
+    ismanager boolean DEFAULT FALSE,
     pass_id NOT NULL CHECK (regex('\d{3}-\d{3}')) UNIQUE,  /* Функция regex из внешнего модуля sqlite-regex  https://github.com/asg017/sqlite-regex*/
     CONSTRAINT check_emp_date CHECK (empstartdate <= dismissdate),
     CONSTRAINT check_payment CHECK (parperhour > 0)
@@ -35,16 +36,36 @@ CREATE TABLE IF NOT EXISTS main.Sallary (
     CONSTRAINT positive_h CHECK (totalhour BETWEEN 0 AND 744)
 );
 
+/* TEMP и VIEW */
+
+CREATE TEMPORARY TABLE IF NOT EXISTS temp.Session (
+    sessionid blob DEFAULT (randomblob(16)) PRIMARY KEY,
+    emp integer,
+    token blob UNIQUE,
+    clientid text UNIQUE,
+    from_ datetime DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (emp) REFERENCES Employee (empid) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+CREATE TEMP VIEW IF NOT EXISTS temp.Actualsession (
+    sessionid, emp, token, clientid, from_) AS
+    SELECT *
+    FROM temp.Session
+    WHERE STRFTIME('%d', TIMEDIFF(from_, CURRENT_TIMESTAMP)) < 15;
+
+/* PROCEDURES */
 
 /* Нельзя выдать зарплату без информации о налогах */
 CREATE TRIGGER IF NOT EXISTS main.check_exists_bookkeeping
 BEFORE INSERT ON Sallary
 BEGIN
     SELECT 1 AS counter,
-    CASE WHEN counter == 0 THEN RAISE(ABORT, 'Сначала нужно добавить бухгалтерскую информацию в таблицу Bookkeeping') END
+    CASE
+        WHEN counter == 0
+            THEN RAISE(ABORT, 'Сначала нужно добавить бухгалтерскую информацию в таблицу Bookkeeping')
+    END
     FROM Bookkeeping;
 END;
-
 
 /* Зарплата выдаётся за месяц работы: если за конкретный месяц зарплата уже была выдана, то нельзя допустить повторной выдачи */
 CREATE TRIGGER IF NOT EXISTS main.check_one_sallary_per_month
