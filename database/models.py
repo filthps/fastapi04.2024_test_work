@@ -1,8 +1,11 @@
 import sys
-from typing import Union
+from typing import Union, Literal
+from itertools import groupby
 
 
 class Model:
+    fields: tuple = ...
+
     def __init__(self, primary_key="autoincr", insert=False, update=False, delete=False, **kwargs):
         self._primary_key: Union[dict, str] = primary_key  # Python >= 3.7 required! (dict keys ordering)
         self._insert = insert
@@ -39,6 +42,8 @@ class Model:
         return f"{type(self).__name__}({self.__str__()})"
 
     def __is_valid(self):
+        def check_field_names():
+            pass
         if not (sys.version_info.major == 3 and sys.version_info.minor) >= 7:
             raise RuntimeError
         if sum([self._delete, self._update, self._insert]) != 1:
@@ -53,15 +58,29 @@ class Model:
         if self._update or self._insert:
             if not self._data:
                 raise ValueError
+        if type(self.fields) is not tuple:
+            raise TypeError
+        if not self.fields:
+            raise ValueError
+        if not all(map(lambda x: isinstance(x, str), self.fields)):
+            raise TypeError
+        if any(map(lambda x: any([1 if len(i) > 1 else 0 for i in x[1]]), groupby(self.fields))):
+            raise ValueError
+        check_field_names()
 
 
 class Sallary(Model):
-    pass
+    fields = ("sid", "emplid", "nid", "totalhour", "date_",)
 
 
 class Employee(Model):
-    pass
+    fields = ("emplid", "firstname", "lastname", "surname", "payperhour", "empstartdate", "dismissdate", "emstatus",
+              "ismanager",)
 
 
 class Bookkeeping(Model):
-    pass
+    fields = ("id", "ndfltax", "tax", "yearindexpercently", "editdate",)
+
+
+class Session(Model):
+    fields = ("sessionid", "emp", "token", "clientid", "from_",)
